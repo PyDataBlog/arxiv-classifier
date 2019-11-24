@@ -87,15 +87,27 @@ for cat, link_name in tqdm(zip(main_categories, arxiv_names)):
             download_links.append(download_url)
 
         # Scrape the abstract data
-        for x in abstract_links:
-            # TODO: Scrape the abstract data using the abstract link
+        for link in abstract_links:
+            # TODO: Scrape the abstract data using the abstract link, authors, submission_date
             #print(x)
-            pass
+            try:
+                abstract_xml = requests.get(link).text
+
+                abstract_soup = BeautifulSoup(abstract_xml, 'xml')
+                abstract_info = abstract_soup.find('blockquote', {'class': 'abstract mathjax'}).text
+
+            except Exception as e:
+                continue
+
+            abstract_info = abstract_info.replace('Abstract:  ', '')
+
+            abstract_data.append(abstract_info)
 
         # Convert meta-data into a dataframe
         df = pd.DataFrame({'title': all_titles,
                            'download_url': download_links,
-                           'abstract_link': abstract_links})
+                           'abstract_link': abstract_links,
+                           'abstract_text': abstract_data})
 
         # Tag the current subject
         df['subject_tag'] = cat
