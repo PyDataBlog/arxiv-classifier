@@ -2,4 +2,4 @@ requests
 pandas
 selenium
 tqdm
-lxml
+beautifulsoup

@@ -15,6 +15,8 @@ from selenium.webdriver.support import expected_conditions as EC
 #driver = webdriver.Firefox(executable_path = os.getcwd() + '/mac-drivers' + '/geckodriver')
 driver = webdriver.Chrome(executable_path = os.getcwd() + '/linux-drivers' + '/chromedriver')
 
+#driver = webdriver.Chrome(executable_path = os.getcwd() + '/mac-drivers' + '/chromedriver')
+
 '''
 main_categories = [
     'Quantitative Biology', 'Quantitative Finance', 'Statistics', 'Electrical Engineering', 'Economics'
@@ -25,14 +27,14 @@ arxiv_names = [
 ]
 '''
 
-main_categories = ['Economics']
-arxiv_names = ['econ']
+main_categories = ['Quantitative Finance']
+arxiv_names = ['q-fin']
 
 
 # Initiate master dataframe
 main_df = pd.DataFrame()
 
-for cat, link_name in tqdm(zip(main_categories, arxiv_names), desc='Loading data from arxiv'):
+for cat, link_name in tqdm(zip(main_categories, arxiv_names)):
 
     url = f'https://arxiv.org/list/{link_name}/recent'
 
@@ -45,10 +47,9 @@ for cat, link_name in tqdm(zip(main_categories, arxiv_names), desc='Loading data
         )
         all_link.click()
     except Exception as e:
-        pass
+        continue
 
-    print(driver.current_url)
-
+   
     # Get the html for the current url
     html = requests.get(driver.current_url).text
 
@@ -58,7 +59,7 @@ for cat, link_name in tqdm(zip(main_categories, arxiv_names), desc='Loading data
     # Find the main containers
     all_dl = soup.find_all('dl')
 
-    for dl in tqdm(all_dl, desc=f'Dowloading metadata for {cat}'):
+    for dl in all_dl:
 
         # Initiate empty list to contain metadata
         all_titles = []
@@ -93,7 +94,7 @@ for cat, link_name in tqdm(zip(main_categories, arxiv_names), desc='Loading data
 
 
         # Scrape the abstract data
-        for link in tqdm(abstract_links, desc='Attempting To Scrape Abstract Data'):
+        for link in abstract_links:
 
             # TODO: Scrape the abstract data using the abstract link, authors, submission_date
             #print(x)
@@ -102,15 +103,26 @@ for cat, link_name in tqdm(zip(main_categories, arxiv_names), desc='Loading data
                 print('Attempting to scrape the abstract data')
 
                 driver.get(link)
-
+                
+                # Abstract text
                 abstract_block = WebDriverWait(driver, 7).until(
                     EC.presence_of_element_located((By.XPATH, '//*[@id="abs"]/blockquote'))
                 )
                 abstract_text = abstract_block.text
 
-                authors_text = driver.find_element_by_xpath('//*[@id="abs"]/div[1]').text
+                # Authors text
+                WebDriverWait(driver, 7).until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, '#abs > div.authors'))
+                )
 
-                submission_date_text = driver.find_element_by_xpath('//*[@id="abs"]/div[2]').text
+                authors_text = driver.find_element_by_css_selector('#abs > div.authors').text
+
+                # Submission date text
+                WebDriverWait(driver, 7).until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, '#abs > div.dateline'))
+                )
+
+                submission_date_text = driver.find_element_by_css_selector('#abs > div.dateline').text
 
                 print(f'Successfully Scraped the abstract metadata from {link}')
 
@@ -123,7 +135,8 @@ for cat, link_name in tqdm(zip(main_categories, arxiv_names), desc='Loading data
                 submission_data = np.NaN
 
             abstract_text = abstract_text.replace('Abstract:  ', '')
-            submission_date_text = submission_date_text.replace('Submitted on ', '')
+
+            submission_date_text = submission_date_text
 
 
             abstract_data.append(abstract_text)
@@ -150,7 +163,7 @@ for cat, link_name in tqdm(zip(main_categories, arxiv_names), desc='Loading data
 main_df = main_df.reset_index(drop=True)
 
 print(main_df.info())
-print(main_df.head(10))
+print()
 
 main_df.to_excel('test.xlsx', index=False)
 driver.quit()
