@@ -17,7 +17,7 @@ driver = webdriver.Chrome(executable_path = os.getcwd() + '/linux-drivers' + '/c
 
 #driver = webdriver.Chrome(executable_path = os.getcwd() + '/mac-drivers' + '/chromedriver')
 
-'''
+
 main_categories = [
     'Quantitative Biology', 'Quantitative Finance', 'Statistics', 'Electrical Engineering', 'Economics'
 ]
@@ -25,11 +25,12 @@ main_categories = [
 arxiv_names = [
     'q-bio', 'q-fin', 'stat', 'eess', 'econ'
 ]
-'''
 
+
+'''
 main_categories = ['Quantitative Finance']
 arxiv_names = ['q-fin']
-
+'''
 
 # Initiate master dataframe
 main_df = pd.DataFrame()
@@ -49,7 +50,7 @@ for cat, link_name in tqdm(zip(main_categories, arxiv_names)):
     except Exception as e:
         continue
 
-   
+
     # Get the html for the current url
     html = requests.get(driver.current_url).text
 
@@ -93,52 +94,50 @@ for cat, link_name in tqdm(zip(main_categories, arxiv_names)):
             download_links.append(download_url)
 
 
-        # Scrape the abstract data
+        # Scrape the abstract meta-data
         for link in abstract_links:
 
-            # TODO: Scrape the abstract data using the abstract link, authors, submission_date
+            # TODO: Test the downloaded meta-data
             #print(x)
             try:
 
-                print('Attempting to scrape the abstract data')
+                #print('Attempting to scrape the abstract data')
 
                 driver.get(link)
-                
+
                 # Abstract text
-                abstract_block = WebDriverWait(driver, 7).until(
+                abstract_block = WebDriverWait(driver, 20).until(
                     EC.presence_of_element_located((By.XPATH, '//*[@id="abs"]/blockquote'))
                 )
                 abstract_text = abstract_block.text
 
                 # Authors text
-                WebDriverWait(driver, 7).until(
+                WebDriverWait(driver, 10).until(
                     EC.presence_of_element_located((By.CSS_SELECTOR, '#abs > div.authors'))
                 )
 
                 authors_text = driver.find_element_by_css_selector('#abs > div.authors').text
 
                 # Submission date text
-                WebDriverWait(driver, 7).until(
+                WebDriverWait(driver, 10).until(
                     EC.presence_of_element_located((By.CSS_SELECTOR, '#abs > div.dateline'))
                 )
 
                 submission_date_text = driver.find_element_by_css_selector('#abs > div.dateline').text
 
-                print(f'Successfully Scraped the abstract metadata from {link}')
+                #print(f'Successfully Scraped the abstract metadata from {link}')
+
+                abstract_text = abstract_text.replace('Abstract:  ', '')
 
             except Exception as e:
 
-                print(f'Failed to scrape abstract data for {link}')
-
-                abstract_text = np.NaN
+                #print(f'Failed to scrape abstract data for {link}')
+                # Set authors, abstract and submission info to NaN if scraping fails
                 authors_text = np.NaN
-                submission_data = np.NaN
+                abstract_text = np.NaN
+                submission_date_text = np.NaN
 
-            abstract_text = abstract_text.replace('Abstract:  ', '')
-
-            submission_date_text = submission_date_text
-
-
+            # Append metadata info to the main data lists
             abstract_data.append(abstract_text)
             authors_data.append(authors_text)
             submission_data.append(submission_date_text)
@@ -160,12 +159,8 @@ for cat, link_name in tqdm(zip(main_categories, arxiv_names)):
 
     time.sleep(2)
 
+# Reset index and export data
 main_df = main_df.reset_index(drop=True)
+main_df.to_csv('data/test.csv', index=False)
 
-print(main_df.info())
-print()
-
-main_df.to_excel('test.xlsx', index=False)
 driver.quit()
-
-# Dimensions: date_scraped, url, title, abstract, authors, tag
