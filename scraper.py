@@ -3,6 +3,7 @@ import os
 import time
 import pandas as pd
 import numpy as np
+import sqlite3
 from tqdm import tqdm
 from bs4 import BeautifulSoup
 from selenium import webdriver
@@ -112,14 +113,14 @@ for cat, link_name in tqdm(zip(main_categories, arxiv_names)):
                 abstract_text = abstract_block.text
 
                 # Authors text
-                WebDriverWait(driver, 10).until(
+                WebDriverWait(driver, 20).until(
                     EC.presence_of_element_located((By.CSS_SELECTOR, '#abs > div.authors'))
                 )
 
                 authors_text = driver.find_element_by_css_selector('#abs > div.authors').text
 
                 # Submission date text
-                WebDriverWait(driver, 10).until(
+                WebDriverWait(driver, 20).until(
                     EC.presence_of_element_located((By.CSS_SELECTOR, '#abs > div.dateline'))
                 )
 
@@ -162,5 +163,9 @@ for cat, link_name in tqdm(zip(main_categories, arxiv_names)):
 # Reset index and export data
 main_df = main_df.reset_index(drop=True)
 main_df.to_csv('data/test.csv', index=False)
+main_df.to_excel('data/test.xlsx', index=False)
+
+with sqlite3.connect('data/arxiv.sqlite') as conn:
+    main_df.to_sql('raw_data', if_exists='append', con=conn, index=False)
 
 driver.quit()
