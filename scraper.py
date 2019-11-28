@@ -107,20 +107,20 @@ for cat, link_name in tqdm(zip(main_categories, arxiv_names)):
                 driver.get(link)
 
                 # Abstract text
-                abstract_block = WebDriverWait(driver, 20).until(
+                abstract_block = WebDriverWait(driver, 30).until(
                     EC.presence_of_element_located((By.XPATH, '//*[@id="abs"]/blockquote'))
                 )
                 abstract_text = abstract_block.text
 
                 # Authors text
-                WebDriverWait(driver, 20).until(
+                WebDriverWait(driver, 30).until(
                     EC.presence_of_element_located((By.CSS_SELECTOR, '#abs > div.authors'))
                 )
 
                 authors_text = driver.find_element_by_css_selector('#abs > div.authors').text
 
                 # Submission date text
-                WebDriverWait(driver, 20).until(
+                WebDriverWait(driver, 30).until(
                     EC.presence_of_element_located((By.CSS_SELECTOR, '#abs > div.dateline'))
                 )
 
