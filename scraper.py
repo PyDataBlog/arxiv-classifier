@@ -98,11 +98,7 @@ for cat, link_name in tqdm(zip(main_categories, arxiv_names)):
         # Scrape the abstract meta-data
         for link in abstract_links:
 
-            # TODO: Test the downloaded meta-data
-            #print(x)
             try:
-
-                #print('Attempting to scrape the abstract data')
 
                 driver.get(link)
 
@@ -126,13 +122,10 @@ for cat, link_name in tqdm(zip(main_categories, arxiv_names)):
 
                 submission_date_text = driver.find_element_by_css_selector('#abs > div.dateline').text
 
-                #print(f'Successfully Scraped the abstract metadata from {link}')
-
                 abstract_text = abstract_text.replace('Abstract:  ', '')
 
             except Exception as e:
 
-                #print(f'Failed to scrape abstract data for {link}')
                 # Set authors, abstract and submission info to NaN if scraping fails
                 authors_text = np.NaN
                 abstract_text = np.NaN
