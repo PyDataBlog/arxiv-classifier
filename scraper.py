@@ -18,7 +18,7 @@ driver = webdriver.Chrome(executable_path = os.getcwd() + '/linux-drivers' + '/c
 
 #driver = webdriver.Chrome(executable_path = os.getcwd() + '/mac-drivers' + '/chromedriver')
 
-
+'''
 main_categories = [
     'Quantitative Biology', 'Quantitative Finance', 'Statistics', 'Electrical Engineering', 'Economics'
 ]
@@ -26,12 +26,12 @@ main_categories = [
 arxiv_names = [
     'q-bio', 'q-fin', 'stat', 'eess', 'econ'
 ]
-
-
 '''
+
+
 main_categories = ['Quantitative Finance']
 arxiv_names = ['q-fin']
-'''
+
 
 # Initiate master dataframe
 main_df = pd.DataFrame()
@@ -103,20 +103,20 @@ for cat, link_name in tqdm(zip(main_categories, arxiv_names)):
                 driver.get(link)
 
                 # Abstract text
-                abstract_block = WebDriverWait(driver, 30).until(
+                abstract_block = WebDriverWait(driver, 45).until(
                     EC.presence_of_element_located((By.XPATH, '//*[@id="abs"]/blockquote'))
                 )
                 abstract_text = abstract_block.text
 
                 # Authors text
-                WebDriverWait(driver, 30).until(
+                WebDriverWait(driver, 45).until(
                     EC.presence_of_element_located((By.CSS_SELECTOR, '#abs > div.authors'))
                 )
 
                 authors_text = driver.find_element_by_css_selector('#abs > div.authors').text
 
                 # Submission date text
-                WebDriverWait(driver, 30).until(
+                WebDriverWait(driver, 45).until(
                     EC.presence_of_element_located((By.CSS_SELECTOR, '#abs > div.dateline'))
                 )
 
@@ -161,4 +161,15 @@ main_df.to_excel('data/test.xlsx', index=False)
 with sqlite3.connect('data/arxiv.sqlite') as conn:
     main_df.to_sql('raw_data', if_exists='append', con=conn, index=False)
 
+
+# Drop duplicate data
+with sqlite3.connect('data/arxiv.sqlite') as conn:
+    # read raw data and drop duplicates
+    df = pd.read_sql_query(sql='SELECT * FROM raw_data', con=conn)
+    df = df.drop_duplicates(subset='abstract_link')
+
+    # replace duplicated data with clean data
+    df.to_sql('raw_data', con=conn, if_exists='replace', index=False)
+
+# Exit application
 driver.quit()
