@@ -13,12 +13,18 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 
-#driver = webdriver.Firefox(executable_path = os.getcwd() + '/mac-drivers' + '/geckodriver')
-driver = webdriver.Chrome(executable_path = os.getcwd() + '/linux-drivers' + '/chromedriver')
+# Specify webdriver options
+options = webdriver.ChromeOptions()
+options.add_argument('headless')  # set to headerless windows
+options.add_argument('window-size=1200x600')  # set the window size
+
+# Initiate headerless scraping
+driver = webdriver.Chrome(executable_path = os.getcwd() + '/linux-drivers' + '/chromedriver',
+                         options=options)
 
 #driver = webdriver.Chrome(executable_path = os.getcwd() + '/mac-drivers' + '/chromedriver')
 
-'''
+
 main_categories = [
     'Quantitative Biology', 'Quantitative Finance', 'Statistics', 'Electrical Engineering', 'Economics'
 ]
@@ -26,12 +32,12 @@ main_categories = [
 arxiv_names = [
     'q-bio', 'q-fin', 'stat', 'eess', 'econ'
 ]
+
+
 '''
-
-
 main_categories = ['Quantitative Finance']
 arxiv_names = ['q-fin']
-
+'''
 
 # Initiate master dataframe
 main_df = pd.DataFrame()
