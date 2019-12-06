@@ -24,7 +24,7 @@ driver = webdriver.Chrome(executable_path = os.getcwd() + '/linux-drivers' + '/c
 
 #driver = webdriver.Chrome(executable_path = os.getcwd() + '/mac-drivers' + '/chromedriver')
 
-
+"""
 main_categories = [
     'Quantitative Biology', 'Quantitative Finance', 'Statistics', 'Electrical Engineering', 'Economics'
 ]
@@ -32,12 +32,12 @@ main_categories = [
 arxiv_names = [
     'q-bio', 'q-fin', 'stat', 'eess', 'econ'
 ]
+"""
 
+# TODO: Fix bug when there's no 'all' button to click
+main_categories = ['Economics']
+arxiv_names = ['econ']
 
-'''
-main_categories = ['Quantitative Finance']
-arxiv_names = ['q-fin']
-'''
 
 # Initiate master dataframe
 main_df = pd.DataFrame()
