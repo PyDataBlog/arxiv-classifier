@@ -11,7 +11,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-
+from selenium.common.exceptions import TimeoutException
 
 # Specify webdriver options
 options = webdriver.ChromeOptions()
@@ -22,9 +22,6 @@ options.add_argument('window-size=1200x600')  # set the window size
 driver = webdriver.Chrome(executable_path = os.getcwd() + '/linux-drivers' + '/chromedriver',
                          options=options)
 
-#driver = webdriver.Chrome(executable_path = os.getcwd() + '/mac-drivers' + '/chromedriver')
-
-"""
 main_categories = [
     'Quantitative Biology', 'Quantitative Finance', 'Statistics', 'Electrical Engineering', 'Economics'
 ]
@@ -32,12 +29,13 @@ main_categories = [
 arxiv_names = [
     'q-bio', 'q-fin', 'stat', 'eess', 'econ'
 ]
-"""
 
-# TODO: Fix bug when there's no 'all' button to click
+
+"""
+# TODO: Fix bug when there's no 'all' button to click (Testing fix)
 main_categories = ['Economics']
 arxiv_names = ['econ']
-
+"""
 
 # Initiate master dataframe
 main_df = pd.DataFrame()
@@ -50,12 +48,14 @@ for cat, link_name in tqdm(zip(main_categories, arxiv_names)):
 
     try:
         # Wait until the 'all' link is accessible, get this link and click it
-        all_link = WebDriverWait(driver, 7).until(
+        all_link = WebDriverWait(driver, 15).until(
             EC.presence_of_element_located((By.XPATH, '//*[@id="dlpage"]/small[2]/a[3]'))
         )
         all_link.click()
-    except Exception as e:
-        continue
+
+    except TimeoutException:
+        # Subjects with no all click have all their data ready to be scraped
+        pass
 
 
     # Get the html for the current url
@@ -76,6 +76,7 @@ for cat, link_name in tqdm(zip(main_categories, arxiv_names)):
         abstract_data = []
         authors_data = []
         submission_data = []
+        subjects_data = []
 
         # Titles
         for x in dl.find_all('dd'):
@@ -100,6 +101,10 @@ for cat, link_name in tqdm(zip(main_categories, arxiv_names)):
             download_url = link_list[1]
             download_links.append(download_url)
 
+        # Subjects
+        for x in dl.find_all('div', {'class': 'list-subjects'}):
+            subjects = x.text.strip().replace('Subjects: ', '')
+            subjects_data.append(subjects)
 
         # Scrape the abstract meta-data
         for link in abstract_links:
@@ -109,26 +114,26 @@ for cat, link_name in tqdm(zip(main_categories, arxiv_names)):
                 driver.get(link)
 
                 # Abstract text
-                abstract_block = WebDriverWait(driver, 45).until(
+                abstract_block = WebDriverWait(driver, 60).until(
                     EC.presence_of_element_located((By.XPATH, '//*[@id="abs"]/blockquote'))
                 )
                 abstract_text = abstract_block.text
+                abstract_text = abstract_text.replace('Abstract:  ', '')
 
                 # Authors text
-                WebDriverWait(driver, 45).until(
+                WebDriverWait(driver, 60).until(
                     EC.presence_of_element_located((By.CSS_SELECTOR, '#abs > div.authors'))
                 )
 
                 authors_text = driver.find_element_by_css_selector('#abs > div.authors').text
 
                 # Submission date text
-                WebDriverWait(driver, 45).until(
+                WebDriverWait(driver, 60).until(
                     EC.presence_of_element_located((By.CSS_SELECTOR, '#abs > div.dateline'))
                 )
 
                 submission_date_text = driver.find_element_by_css_selector('#abs > div.dateline').text
 
-                abstract_text = abstract_text.replace('Abstract:  ', '')
 
             except Exception as e:
 
@@ -148,14 +153,14 @@ for cat, link_name in tqdm(zip(main_categories, arxiv_names)):
                            'abstract_link': abstract_links,
                            'abstract_text': abstract_data,
                            'authors': authors_data,
-                           'submission_date': submission_data})
+                           'submission_date': submission_data,
+                           'subjects': subjects_data})
 
         # Tag the current subject
         df['subject_tag'] = cat
 
         # Append the subject dataframe to the main dataframe
         main_df = main_df.append(df)
-
 
     time.sleep(2)
 
@@ -164,6 +169,7 @@ main_df = main_df.reset_index(drop=True)
 main_df.to_csv('data/test.csv', index=False)
 main_df.to_excel('data/test.xlsx', index=False)
 
+# Push scraped data to db
 with sqlite3.connect('data/arxiv.sqlite') as conn:
     main_df.to_sql('raw_data', if_exists='append', con=conn, index=False)
 
