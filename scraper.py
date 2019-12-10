@@ -24,11 +24,11 @@ driver = webdriver.Chrome(executable_path = os.getcwd() + '/linux-drivers' + '/c
                          options=options)
 
 main_categories = [
-    'Economics', 'Quantitative Biology', 'Quantitative Finance'
+    'Economics', 'Quantitative Biology', 'Quantitative Finance', 'Statistics', 'Electrical Engineering'
 ]
 
 arxiv_names = [
-    'econ', 'q-bio', 'q-fin'
+    'econ', 'q-bio', 'q-fin', 'stat', 'eess'
 ]
 
 
