@@ -13,6 +13,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 
+
 # Specify webdriver options
 options = webdriver.ChromeOptions()
 options.add_argument('headless')  # set to headerless windows
@@ -23,11 +24,11 @@ driver = webdriver.Chrome(executable_path = os.getcwd() + '/linux-drivers' + '/c
                          options=options)
 
 main_categories = [
-    'Quantitative Biology', 'Quantitative Finance', 'Statistics', 'Electrical Engineering', 'Economics'
+    'Economics', 'Quantitative Biology', 'Quantitative Finance'
 ]
 
 arxiv_names = [
-    'q-bio', 'q-fin', 'stat', 'eess', 'econ'
+    'econ', 'q-bio', 'q-fin'
 ]
 
 
@@ -59,8 +60,11 @@ for cat, link_name in tqdm(zip(main_categories, arxiv_names)):
 
 
     # Get the html for the current url
-    html = requests.get(driver.current_url).text
+    #html = requests.get(driver.current_url).text
+    time.sleep(2)
+    html = driver.page_source
 
+    time.sleep(1)
     # Parse the html with BeautifulSoup
     soup = BeautifulSoup(html, 'html.parser')
 
@@ -81,7 +85,7 @@ for cat, link_name in tqdm(zip(main_categories, arxiv_names)):
         # Titles
         for x in dl.find_all('dd'):
             # list of all titles
-            titles = [x.text.replace('Title: ', '').replace('\n', '') for x in x.find_all('div', {'class': 'list-title mathjax'})]
+            titles = [x.text.replace('Title: ', '').strip() for x in x.find_all('div', {'class': 'list-title mathjax'})]
 
             # Append titles to all titles list
             for t in titles:
@@ -162,7 +166,7 @@ for cat, link_name in tqdm(zip(main_categories, arxiv_names)):
         # Append the subject dataframe to the main dataframe
         main_df = main_df.append(df)
 
-    time.sleep(2)
+    time.sleep(3)
 
 # Reset index and export data
 main_df = main_df.reset_index(drop=True)
