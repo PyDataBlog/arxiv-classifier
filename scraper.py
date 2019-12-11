@@ -67,7 +67,7 @@ for cat, link_name in tqdm(zip(main_categories, arxiv_names)):
     time.sleep(1)
     # Parse the html with BeautifulSoup
     soup = BeautifulSoup(html, 'html.parser')
-
+    time.sleep(2)
     # Find the main containers
     all_dl = soup.find_all('dl')
 
@@ -85,7 +85,7 @@ for cat, link_name in tqdm(zip(main_categories, arxiv_names)):
         # Titles
         for x in dl.find_all('dd'):
             # list of all titles
-            titles = [x.text.replace('Title: ', '').strip() for x in x.find_all('div', {'class': 'list-title mathjax'})]
+            titles = [x.text.replace('Title: ', '').replace('\n', '') for x in x.find_all('div', {'class': 'list-title mathjax'})]
 
             # Append titles to all titles list
             for t in titles:
