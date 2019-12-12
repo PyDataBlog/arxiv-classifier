@@ -1,4 +1,3 @@
-import requests
 import os
 import time
 import pandas as pd
@@ -24,16 +23,19 @@ driver = webdriver.Chrome(executable_path = os.getcwd() + '/linux-drivers' + '/c
                          options=options)
 
 main_categories = [
-    'Economics', 'Quantitative Biology', 'Quantitative Finance', 'Statistics', 'Electrical Engineering'
+    'Economics', 'Quantitative Biology', 'Quantitative Finance',
+    'Statistics', 'Electrical Engineering', 'Mathematics',
+    'Computer Science', 'Physics', 'Astrophysics'
 ]
 
 arxiv_names = [
-    'econ', 'q-bio', 'q-fin', 'stat', 'eess'
+    'econ', 'q-bio', 'q-fin',
+    'stat', 'eess', 'math',
+    'cs', 'physics', 'astro-ph'
 ]
 
 
 """
-# TODO: Fix bug when there's no 'all' button to click (Testing fix)
 main_categories = ['Economics']
 arxiv_names = ['econ']
 """
@@ -60,11 +62,9 @@ for cat, link_name in tqdm(zip(main_categories, arxiv_names)):
 
 
     # Get the html for the current url
-    #html = requests.get(driver.current_url).text
     time.sleep(2)
     html = driver.page_source
 
-    time.sleep(1)
     # Parse the html with BeautifulSoup
     soup = BeautifulSoup(html, 'html.parser')
     time.sleep(2)
@@ -175,17 +175,8 @@ main_df.to_excel('data/test.xlsx', index=False)
 
 # Push scraped data to db
 with sqlite3.connect('data/arxiv.sqlite') as conn:
-    main_df.to_sql('raw_data', if_exists='append', con=conn, index=False)
+    main_df.to_sql('raw_data', if_exists='replace', con=conn, index=False)
 
-
-# Drop duplicate data
-with sqlite3.connect('data/arxiv.sqlite') as conn:
-    # read raw data and drop duplicates
-    df = pd.read_sql_query(sql='SELECT * FROM raw_data', con=conn)
-    df = df.drop_duplicates(subset='abstract_link')
-
-    # replace duplicated data with clean data
-    df.to_sql('raw_data', con=conn, if_exists='replace', index=False)
 
 # Exit application
 driver.quit()
