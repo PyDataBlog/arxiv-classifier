@@ -170,9 +170,9 @@ if __name__ == "__main__":
     options.add_argument('window-size=1200x600')  # set the window size
 
     # Initiate headerless scraping
-    driver = webdriver.Chrome(executable_path = os.getcwd() + '/linux-drivers' + '/chromedriver',
+    driver = webdriver.Chrome(executable_path ='app/linux-drivers/chromedriver',
                             options=options)
-
+    """
     main_categories = [
         'Economics', 'Quantitative Biology', 'Quantitative Finance',
         'Statistics', 'Electrical Engineering', 'Mathematics',
@@ -184,10 +184,11 @@ if __name__ == "__main__":
         'stat', 'eess', 'math',
         'cs', 'physics', 'astro-ph'
     ]
+    """
 
-    """ # Only used for testing
+    # Only used for testing
     main_categories = ['Economics']
     arxiv_names = ['econ']
-    """
+
 
     scrape_data(driver = driver, categories = main_categories, arxiv_identifier = arxiv_names)
