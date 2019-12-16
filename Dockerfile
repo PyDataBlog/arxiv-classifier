@@ -5,7 +5,9 @@ FROM tensorflow/tensorflow:2.0.0-py3
 LABEL maintainer="bbrenyah@gmail.com"
 
 # Create working folder
-RUN mkdir -p /home/arxiv-classifier
+RUN mkdir -p /home/arxiv-classifier && \
+    apt update --fix-missing && \
+    apt-get install -y firefox sqlite3
 
 # Set the newly created folder as the working directory
 WORKDIR /home/arxiv-classifier

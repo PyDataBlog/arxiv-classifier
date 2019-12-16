@@ -3,6 +3,7 @@ import time
 import pandas as pd
 import numpy as np
 import sqlite3
+import platform
 from tqdm import tqdm
 from bs4 import BeautifulSoup
 from selenium import webdriver
@@ -63,7 +64,7 @@ def scrape_data(driver, categories, arxiv_identifier):
             # Titles
             for x in dl.find_all('dd'):
                 # list of all titles
-                titles = [x.text.replace('Title: ', '').replace('\n', '') for x in x.find_all('div', {'class': 'list-title mathjax'})]
+                titles = [x.text.replace('Title: ', '').strip() for x in x.find_all('div', {'class': 'list-title mathjax'})]
 
                 # Append titles to all titles list
                 for t in titles:
@@ -148,13 +149,10 @@ def scrape_data(driver, categories, arxiv_identifier):
 
     # Reset index and export data
     main_df = main_df.reset_index(drop=True)
-    main_df.to_csv('data/test.csv', index=False)
-    main_df.to_excel('data/test.xlsx', index=False)
 
     # Push scraped data to db
-    with sqlite3.connect('data/arxiv.sqlite') as conn:
+    with sqlite3.connect(os.path.join('app', 'data', 'arxiv.sqlite')) as conn:
         main_df.to_sql('raw_data', if_exists='replace', con=conn, index=False)
-
 
     # Exit application
     driver.quit()
@@ -165,14 +163,30 @@ def scrape_data(driver, categories, arxiv_identifier):
 if __name__ == "__main__":
 
     # Specify webdriver options
-    options = webdriver.ChromeOptions()
-    options.add_argument('headless')  # set to headerless windows
+    options = webdriver.FirefoxOptions()
+    options.headless = True  # set to headerless windows
     options.add_argument('window-size=1200x600')  # set the window size
 
-    # Initiate headerless scraping
-    driver = webdriver.Chrome(executable_path ='app/linux-drivers/chromedriver',
-                            options=options)
-    """
+    os_platform = platform.system()
+
+    if os_platform == 'Linux':
+        # Specify Linux path for the webdriver executable
+        linux_path = os.path.join('app', 'linux-drivers', 'geckodriver')
+
+        # Initiate headerless scraping in a linux environment
+        driver = webdriver.Firefox(executable_path = linux_path,
+                                   options=options)
+
+    elif os_platform == 'Darwin':
+        # Specify Mac path for the chromedriver executable
+        mac_path = os.path.join('app', 'mac-drivers', 'geckodriver')
+
+        # Initiate headerless scraping in a darwin/mac environment
+        driver = webdriver.Firefox(executable_path = mac_path,
+                                   options=options)
+    else:
+        raise OSError('Unsupported OS Platform. Only *nix platforms supported for now')
+
     main_categories = [
         'Economics', 'Quantitative Biology', 'Quantitative Finance',
         'Statistics', 'Electrical Engineering', 'Mathematics',
@@ -184,11 +198,11 @@ if __name__ == "__main__":
         'stat', 'eess', 'math',
         'cs', 'physics', 'astro-ph'
     ]
-    """
 
+    """
     # Only used for testing
     main_categories = ['Economics']
     arxiv_names = ['econ']
-
+    """
 
     scrape_data(driver = driver, categories = main_categories, arxiv_identifier = arxiv_names)
