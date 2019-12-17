@@ -24,7 +24,7 @@ def scrape_data(driver, categories, arxiv_identifier):
 
     for cat, link_name in tqdm(zip(main_categories, arxiv_names)):
 
-        url = f'https://arxiv.org/list/{link_name}/recent'
+        url = f'https://export.arxiv.org/list/{link_name}/recent'
 
         driver.get(url)
 
@@ -187,10 +187,10 @@ if __name__ == "__main__":
 
     elif os_platform == 'Windows':
         # Specify Mac path for the chromedriver executable
-        mac_path = os.path.join('app', 'windows-drivers', 'geckodriver.exe')
+        windows_path = os.path.join('app', 'windows-drivers', 'geckodriver.exe')
 
         # Initiate headerless scraping in a darwin/mac environment
-        driver = webdriver.Firefox(executable_path = mac_path,
+        driver = webdriver.Firefox(executable_path = windows_path,
                                    options=options)
 
     else:
