@@ -184,8 +184,17 @@ if __name__ == "__main__":
         # Initiate headerless scraping in a darwin/mac environment
         driver = webdriver.Firefox(executable_path = mac_path,
                                    options=options)
+
+    elif os_platform == 'Windows':
+        # Specify Mac path for the chromedriver executable
+        mac_path = os.path.join('app', 'windows-drivers', 'geckodriver')
+
+        # Initiate headerless scraping in a darwin/mac environment
+        driver = webdriver.Firefox(executable_path = mac_path,
+                                   options=options)
+
     else:
-        raise OSError('Unsupported OS Platform. Only *nix platforms supported for now')
+        raise OSError('Unsupported OS Platform. Only Linux/Mac/Windows firefox drivers supported!')
 
     main_categories = [
         'Economics', 'Quantitative Biology', 'Quantitative Finance',
