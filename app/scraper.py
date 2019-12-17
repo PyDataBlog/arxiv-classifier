@@ -187,7 +187,7 @@ if __name__ == "__main__":
 
     elif os_platform == 'Windows':
         # Specify Mac path for the chromedriver executable
-        mac_path = os.path.join('app', 'windows-drivers', 'geckodriver')
+        mac_path = os.path.join('app', 'windows-drivers', 'geckodriver.exe')
 
         # Initiate headerless scraping in a darwin/mac environment
         driver = webdriver.Firefox(executable_path = mac_path,
