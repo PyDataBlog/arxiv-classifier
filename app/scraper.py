@@ -74,7 +74,7 @@ def scrape_data(driver, categories, arxiv_identifier):
             for x in dl.find_all('dt'):
 
                 all_article_links = x.find_all('a', href=True)
-                link_list = ['https://arxiv.org' + link['href'] for link in all_article_links][0:2]
+                link_list = ['https://export.arxiv.org' + link['href'] for link in all_article_links][0:2]
 
                 # Append abstract url to abstract links
                 abstract_url = link_list[0]
@@ -97,25 +97,25 @@ def scrape_data(driver, categories, arxiv_identifier):
                     driver.get(link)
 
                     # Abstract text
-                    abstract_block = WebDriverWait(driver, 90).until(
-                        EC.presence_of_element_located((By.XPATH, '//*[@id="abs"]/blockquote'))
+                    abstract_block = WebDriverWait(driver, 10).until(
+                        EC.presence_of_element_located((By.XPATH, '//*[@id="abs"]/div[2]/blockquote'))
                     )
                     abstract_text = abstract_block.text
                     abstract_text = abstract_text.replace('Abstract:  ', '')
 
                     # Authors text
-                    WebDriverWait(driver, 90).until(
-                        EC.presence_of_element_located((By.CSS_SELECTOR, '#abs > div.authors'))
+                    WebDriverWait(driver, 10).until(
+                        EC.presence_of_element_located((By.CSS_SELECTOR, '#abs > div.leftcolumn > div.authors'))
                     )
 
-                    authors_text = driver.find_element_by_css_selector('#abs > div.authors').text
+                    authors_text = driver.find_element_by_css_selector('#abs > div.leftcolumn > div.authors').text
 
                     # Submission date text
-                    WebDriverWait(driver, 90).until(
-                        EC.presence_of_element_located((By.CSS_SELECTOR, '#abs > div.dateline'))
+                    WebDriverWait(driver, 10).until(
+                        EC.presence_of_element_located((By.CSS_SELECTOR, '#abs > div.leftcolumn > div.dateline'))
                     )
 
-                    submission_date_text = driver.find_element_by_css_selector('#abs > div.dateline').text
+                    submission_date_text = driver.find_element_by_css_selector('#abs > div.leftcolumn > div.dateline').text
 
 
                 except Exception as e:
