@@ -97,21 +97,21 @@ def scrape_data(driver, categories, arxiv_identifier):
                     driver.get(link)
 
                     # Abstract text
-                    abstract_block = WebDriverWait(driver, 10).until(
+                    abstract_block = WebDriverWait(driver, 90).until(
                         EC.presence_of_element_located((By.XPATH, '//*[@id="abs"]/div[2]/blockquote'))
                     )
                     abstract_text = abstract_block.text
                     abstract_text = abstract_text.replace('Abstract:  ', '')
 
                     # Authors text
-                    WebDriverWait(driver, 10).until(
+                    WebDriverWait(driver, 90).until(
                         EC.presence_of_element_located((By.CSS_SELECTOR, '#abs > div.leftcolumn > div.authors'))
                     )
 
                     authors_text = driver.find_element_by_css_selector('#abs > div.leftcolumn > div.authors').text
 
                     # Submission date text
-                    WebDriverWait(driver, 10).until(
+                    WebDriverWait(driver, 90).until(
                         EC.presence_of_element_located((By.CSS_SELECTOR, '#abs > div.leftcolumn > div.dateline'))
                     )
 
