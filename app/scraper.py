@@ -164,7 +164,7 @@ if __name__ == "__main__":
 
     # Specify webdriver options
     options = webdriver.FirefoxOptions()
-    options.headless = True  # set to headerless windows
+    #options.headless = True  # set to headerless windows
     options.add_argument('window-size=1200x600')  # set the window size
 
     os_platform = platform.system()
@@ -199,13 +199,22 @@ if __name__ == "__main__":
     main_categories = [
         'Economics', 'Quantitative Biology', 'Quantitative Finance',
         'Statistics', 'Electrical Engineering', 'Mathematics',
-        'Computer Science', 'Physics', 'Astrophysics'
+        'Computer Science', 'Physics', 'Astrophysics', 'Condensed Matter',
+        'General Relativity & Quantum Cosmology', 'High Energy Physics - Experiment',
+        'High Energy Physics - Lattice', 'High Energy Physics - Phenomenology',
+        'High Energy Physics - Theory', 'Mathematical Physics',
+        'Nonlinear Sciences', 'Nuclear Experiment', 'Nuclear Theory',
+        'Quantum Physics'
     ]
 
     arxiv_names = [
         'econ', 'q-bio', 'q-fin',
         'stat', 'eess', 'math',
-        'cs', 'physics', 'astro-ph'
+        'cs', 'physics', 'astro-ph',
+        'cond-mat', 'gr-qc', 'hep-ex',
+        'hep-lat', 'hep-ph', 'hep-th', 
+        'math-ph', 'nlin', 'nucl-ex',
+        'nucl-th', 'quant-ph'
     ]
 
     """
