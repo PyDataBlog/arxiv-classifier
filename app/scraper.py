@@ -160,12 +160,75 @@ def scrape_data(driver, categories, arxiv_identifier):
     print('Done scraping all the data')
 
 
+def fill_missing_data(driver):
+    """
+    """
+
+    with sqlite3.connect(os.path.join('app', 'data', 'arxiv.sqlite')) as conn:
+        missing_df = pd.read_sql_query('SELECT * FROM raw_data WHERE abstract_text IS NULL', con=conn)
+
+    abstract_data = []
+    authors_data = []
+    submission_data = []
+
+    for link in tqdm(missing_df['abstract_link'].values.tolist()):
+        try:
+            driver.get(link)
+
+            # Abstract text
+            abstract_block = WebDriverWait(driver, 90).until(
+                EC.presence_of_element_located((By.XPATH, '//*[@id="abs"]/div[2]/blockquote'))
+            )
+            abstract_text = abstract_block.text
+            abstract_text = abstract_text.replace('Abstract:  ', '')
+
+            # Authors text
+            WebDriverWait(driver, 90).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, '#abs > div.leftcolumn > div.authors'))
+            )
+
+            authors_text = driver.find_element_by_css_selector('#abs > div.leftcolumn > div.authors').text
+
+            # Submission date text
+            WebDriverWait(driver, 90).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, '#abs > div.leftcolumn > div.dateline'))
+            )
+
+            submission_date_text = driver.find_element_by_css_selector('#abs > div.leftcolumn > div.dateline').text
+
+
+        except Exception as e:
+            print(e)
+            authors_text = np.NaN
+            abstract_text = np.NaN
+            submission_date_text = np.NaN
+
+        # Append metadata info to the main data lists
+        abstract_data.append(abstract_text)
+        authors_data.append(authors_text)
+        submission_data.append(submission_date_text)
+
+    new_df = pd.DataFrame({'abstract_text': abstract_data,
+                           'authors': authors_data,
+                           'submission_date': submission_date_text})
+
+    print(new_df)
+
+    missing_df.loc[:, 'abstract_text'] = new_df['abstract_text']
+    missing_df.loc[:, 'authors'] = new_df['authors']
+    missing_df.loc[:, 'submission_date'] = new_df['submission_date']
+
+    print(missing_df.info())
+
+    print(missing_df[['title', 'abstract_text']])
+    driver.quit()
+
 if __name__ == "__main__":
 
     # Specify webdriver options
     options = webdriver.FirefoxOptions()
-    options.headless = True  # set to headerless windows
-    options.add_argument('window-size=1200x600')  # set the window size
+    #options.headless = True  # set to headerless windows
+    #options.add_argument('window-size=1200x600')  # set the window size
 
     os_platform = platform.system()
 
@@ -223,4 +286,5 @@ if __name__ == "__main__":
     arxiv_names = ['econ']
     """
 
-    scrape_data(driver = driver, categories = main_categories, arxiv_identifier = arxiv_names)
+    #scrape_data(driver = driver, categories = main_categories, arxiv_identifier = arxiv_names)
+    fill_missing_data(driver = driver)
