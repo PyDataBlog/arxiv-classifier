@@ -164,7 +164,7 @@ if __name__ == "__main__":
 
     # Specify webdriver options
     options = webdriver.FirefoxOptions()
-    #options.headless = True  # set to headerless windows
+    options.headless = True  # set to headerless windows
     options.add_argument('window-size=1200x600')  # set the window size
 
     os_platform = platform.system()
