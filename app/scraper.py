@@ -223,6 +223,7 @@ def fill_missing_data(driver):
     print(master_df.info())
 
     with sqlite3.connect(os.path.join('app', 'data', 'arxiv.sqlite')) as conn:
+        #clean_df = master_df.drop_duplicates(subset='title').reset_index(drop=True)
         master_df.to_sql('clean_data', con=conn, if_exists='replace', index=False)
 
 
