@@ -166,6 +166,7 @@ def fill_missing_data(driver):
 
     with sqlite3.connect(os.path.join('app', 'data', 'arxiv.sqlite')) as conn:
         missing_df = pd.read_sql_query('SELECT * FROM raw_data WHERE abstract_text IS NULL', con=conn)
+        main_df = pd.read_sql_query('SELECT * FROM raw_data WHERE abstract_text IS NOT NULL', con=conn)
 
     abstract_data = []
     authors_data = []
@@ -212,22 +213,26 @@ def fill_missing_data(driver):
                            'authors': authors_data,
                            'submission_date': submission_date_text})
 
-    print(new_df)
-
     missing_df.loc[:, 'abstract_text'] = new_df['abstract_text']
     missing_df.loc[:, 'authors'] = new_df['authors']
     missing_df.loc[:, 'submission_date'] = new_df['submission_date']
 
-    print(missing_df.info())
 
-    print(missing_df[['title', 'abstract_text']])
+    master_df = pd.concat([main_df, missing_df])
+
+    print(master_df.info())
+
+    with sqlite3.connect(os.path.join('app', 'data', 'arxiv.sqlite')) as conn:
+        master_df.to_sql('clean_data', con=conn, if_exists='replace', index=False)
+
+
     driver.quit()
 
 if __name__ == "__main__":
 
     # Specify webdriver options
     options = webdriver.FirefoxOptions()
-    #options.headless = True  # set to headerless windows
+    options.headless = True  # set to headerless windows
     #options.add_argument('window-size=1200x600')  # set the window size
 
     os_platform = platform.system()
